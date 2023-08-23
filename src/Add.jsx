@@ -27,7 +27,10 @@ export default function Add(){
 
 
         const res = await addDoc(products,{
-            productName: name
+            productName: name,
+            purchase_price:purchase,
+            sale_price: sale,
+            units:units
           });
           
           console.log(res.firestore);
