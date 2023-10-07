@@ -1,18 +1,19 @@
-import { useContext, useState } from "react";
+import { Suspense, useState } from "react";
 import "./App.css";
 import SearchList from "./components/SeachList";
 import { Button } from "@material-tailwind/react";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
+import Loading from "./components/Loading";
 
 function App() {
     const [text, setText] = useState("");
-    const [params, setParams] = useSearchParams();
 
     const navigator = useNavigate();
 
     return (
-        <div className="  w-75 auto-rows-min  pt-20 grid justify-items-center bg-gradient-to-b from-indigo-600 to-rose-500 min-h-screen">
+        <Suspense fallback={Loading}>
+        <div className="  w-75 auto-rows-min  pt-20 grid justify-items-center bg-gradient-to-b from-indigo-600 to-rose-500 min-h-screen bg-fixed">
             <h1 className="font-bold text-3xl text-white  ">Inventario</h1>
             <input
                 value={text}
@@ -31,7 +32,7 @@ function App() {
             </Button>
             <SearchList input={text} />
         </div>
-    );
+        </Suspense>);
 }
 
 export default App;

@@ -26,6 +26,7 @@ import {
     Firestore,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import Loading from "./Loading";
 
 const products = collection(dataFire, "products");
 
@@ -40,12 +41,18 @@ async function Getter() {
 
     return doks;
 }
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export default function DefaultTable({ children, input }) {
+    const [loaded, setLoaded] = useState(false);
     const [data, setData] = useState([]);
     const navigator = useNavigate();
 
     async function LoadData() {
+
+        await timeout(1000)
         const doks = [];
         const res = await getDocs(query(products));
 
@@ -54,11 +61,12 @@ export default function DefaultTable({ children, input }) {
         });
 
         setData(doks);
+        setLoaded(true);
     }
 
     const eliminarDoc = async (id) => {
         console.log(id);
-        const docRef = await doc(dataFire, "products", id);
+        const docRef = doc(dataFire, "products", id);
         console.log(docRef);
         await deleteDoc(docRef);
         LoadData();
@@ -90,117 +98,129 @@ export default function DefaultTable({ children, input }) {
     };
 
     useEffect(() => {
+        
         LoadData();
     }, []);
 
-    return <>{data ?
-        <Card className="  w-screen  mt-5 bg-transparent grid justify-items-center shadow-none mb-5 ">
-            <table className="  w-3/4 text-left ">
-                <thead>
-                    <tr className={rstyle}>
-                        {TABLE_HEAD.map((head) => (
-                            <th
-                                key={head}
-                                className=" text-center  bg-black rounded-t-3xl p-2"
-                            >
-                                <Typography
-                                    variant="small"
-                                    color="white"
-                                    className="font-normal leading-none opacity-70"
+    return (
+        <>
+            <Card className="  w-screen  mt-5 bg-transparent grid justify-items-center shadow-none mb-5 ">
+                <table className="  w-3/4 text-left ">
+                    <thead>
+                        <tr className={rstyle}>
+                            {TABLE_HEAD.map((head) => (
+                                <th
+                                    key={head}
+                                    className=" text-center  bg-black  border p-2"
                                 >
-                                    {head}
-                                </Typography>
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map(
-                        ({
-                            _id,
-                            productName,
-                            sale_price,
-                            purchase_price,
-                            units,
-                        }) => {
-                            if (productName.includes(input.trim())) {
-                                return (
-                                    <tr key={_id} className={rstyle}>
-                                        <td className="">
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal p-4"
-                                            >
-                                                {productName}
-                                            </Typography>
-                                        </td>
-                                        <td className="">
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal p-4"
-                                            >
-                                                {purchase_price}
-                                            </Typography>
-                                        </td>
-                                        <td className="">
-                                            <Typography
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-normal p-4"
-                                            >
-                                                {sale_price}
-                                            </Typography>
-                                        </td>
-                                        <td className="">
-                                            <Typography
-                                                as="a"
-                                                href="#"
-                                                variant="small"
-                                                color="blue-gray"
-                                                className="font-medium p-4"
-                                            >
-                                                {units}
-                                            </Typography>
-                                        </td>
-                                        <td>
-                                            <ButtonGroup className="grid grid-cols-2 justify-center">
-                                                <Button
-                                                    className="bg-green-500 p-2 rounded m-1 italic"
-                                                    onClick={(e) => {
-                                                        navigator(`edit/?id=${_id}
+                                    <Typography
+                                        variant="small"
+                                        color="white"
+                                        className="font-normal leading-none opacity-70"
+                                    >
+                                        {head}
+                                    </Typography>
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {loaded ? (
+                            data.map(
+                                ({
+                                    _id,
+                                    productName,
+                                    sale_price,
+                                    purchase_price,
+                                    units,
+                                }) => {
+                                    if (productName.includes(input.trim())) {
+                                        return (
+                                            <tr key={_id} className={rstyle}>
+                                                <td className="">
+                                                    <Typography
+                                                        variant="small"
+                                                        color="blue-gray"
+                                                        className="font-normal p-4"
+                                                    >
+                                                        {productName}
+                                                    </Typography>
+                                                </td>
+                                                <td className="">
+                                                    <Typography
+                                                        variant="small"
+                                                        color="blue-gray"
+                                                        className="font-normal p-4"
+                                                    >
+                                                        {purchase_price}
+                                                    </Typography>
+                                                </td>
+                                                <td className="">
+                                                    <Typography
+                                                        variant="small"
+                                                        color="blue-gray"
+                                                        className="font-normal p-4"
+                                                    >
+                                                        {sale_price}
+                                                    </Typography>
+                                                </td>
+                                                <td className="">
+                                                    <Typography
+                                                        as="a"
+                                                        href="#"
+                                                        variant="small"
+                                                        color="blue-gray"
+                                                        className="font-medium p-4"
+                                                    >
+                                                        {units}
+                                                    </Typography>
+                                                </td>
+                                                <td>
+                                                    <ButtonGroup className="grid grid-cols-2 justify-center">
+                                                        <Button
+                                                            className="bg-green-500 p-2 rounded m-1 italic"
+                                                            onClick={(e) => {
+                                                                navigator(`edit/?id=${_id}
                     &productName=${productName}
                     &sale_price=${sale_price}
                     &purchase_price= ${purchase_price}
                     &units= ${units}
                     
                     `);
-                                                    }}
-                                                >
-                                                    Editar
-                                                </Button>
-                                                <Button
-                                                    onClick={(e) =>
-                                                        handleDelete(
-                                                            e,
-                                                            productName,
-                                                            { id: _id }
-                                                        )
-                                                    }
-                                                    className="bg-red-500 p-2 rounded m-1 italic"
-                                                >
-                                                    Eliminar
-                                                </Button>
-                                            </ButtonGroup>
-                                        </td>
-                                    </tr>
-                                );
-                            }
-                        }
-                    )}
-                </tbody>
-            </table>
-        </Card> : <div>Cargando</div>}
+                                                            }}
+                                                        >
+                                                            Editar
+                                                        </Button>
+                                                        <Button
+                                                            onClick={(e) =>
+                                                                handleDelete(
+                                                                    e,
+                                                                    productName,
+                                                                    { id: _id }
+                                                                )
+                                                            }
+                                                            className="bg-red-500 p-2 rounded m-1 italic"
+                                                        >
+                                                            Eliminar
+                                                        </Button>
+                                                    </ButtonGroup>
+                                                </td>
+                                            </tr>
+                                        );
+                                    }
+                                }
+                            )
+                        ) : (
+                            <tr className="bg-transparent " >
+                                <td colSpan={5} className="">
+                                    <Loading ></Loading>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </Card>
         </>
+    );
 }
